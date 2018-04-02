@@ -1,0 +1,100 @@
+﻿--------------------------- 登录 MongoDb ------------------------------------
+# /home/mongodb/bin/mongo ip:port/dbname -p password -u username
+
+	
+-------------------------- MongoDb 基本操作 ---------------------------------
+#### 数据库操作
+> show dbs							----查看数据库
+> use DBName 							----切换到某一数据库(没有则创建） 			
+> db.dropDatabase()       					----删除数据库
+> db 								----显示当前操作的db
+
+#### 集合操作
+> show collections（tables）       				----查看集合
+> db.[collection].drop()					----删除集合
+
+
+#### 文档操作（增删改查）
+> db.[collectionName].insert({...})				----添加文档记录
+
+> db.[collection].remove({删除条件}) 				----删除一条文档记录(注：条件为空，则全删除)
+	eg: db.Ttest1.remove({name:"zhangs"})
+
+> db.[collection].drop() 					----删除集合
+	eg: db.Ttest1.remove({name:"zhangs"})
+		
+> db.[collection].update({查询条件},{$set:{更新内容}}) 		----更新一条文档记录
+	eg: db.Ttest1.update({name:"zhangs"}, {$set:{name:"lisi", age:40}}, upsert=true, multi=true)  如果不存在则插入， 允许修改多条记录
+
+> db.[collectionName].findOne({...}) 				----查找第一条文档记录 	
+> db.[collectionName].find({...}) 				----查找所有记录
+
+	eg: db.collection.find({"key":"value"}).pretty()        ---- pretty()函数
+	eg: db.Ttest.find({'name':'zhangs'}).limit(10)          ---- limit()函数
+	eg: db.Ttest.find({'name':'zhangs'}).sort({_id:-1})     ---- sort()函数     1 升序， -1 降序
+	eg: db.Ttest.find({'name':'zhangs'}).count()      	---- count()函数
+
+
+-------------------------- MongoDb 高级查询 ---------------------------------
+条件操作符 
+$gt : > 
+$lt : < 
+$gte: >= 
+$lte: <= 
+$ne : !=、<> 
+$in : in 
+$nin: not in 
+$all: all 
+$not: 反匹配(1.3.3及以上版本)
+
+
+$返回部分字段
+	db.Ttest.find({},{age:1})                               ---- 1 (true)返回， 0 (false)不返回， 
+$exists判断字段是否存在
+	db.Ttest.find({'name':{$exists:true}})
+
+$type判断字段类型
+	db.Ttest.find({'age':{$type:2}})      			---- 查询所有age字段是字符类型的 
+
+
+
+-------------------------- MongoDb 其他操作 ---------------------------------
+> db.Ttest.distinct('name')					---- 查询指定列，去重复
+> db.Ttest.dataSize()  						---- 查看collection数据的大小
+> db.Ttest.stats()  						---- 查看colleciont状态
+> db.Ttest1.totalIndexSize() 					---- 查询所有索引的大小
+
+> db.printCollectionStats() 					---- 查看各collection的状态
+> db.printReplicationInfo() 					---- 查看主从复制状态
+> db.repairDatabase() 						---- 修复数据库
+> db.db.copyDatabase('Ttest','Ttest_tmp')			---- 拷贝数据库
+
+备份数据库
+          mongodump -h localhost:27017 -d dataname -o /data/dump
+恢复数据库
+          mongorestore -d dataname /data/dump
+
+备份数据库表
+          mongodump -h localhost:27017 -d dataname -c tablename -o /data/dump
+
+恢复数据库表
+          mongorestore -d dataname -c tablename /data/dump
+          mongorestore -h host:port -d dataname --collection tablename ./tmpdump/some.bson
+
+
+
+
+eg:
+
+db.getCollection('Test').find({B040002:{$exists:true}}).sort({_id:-1})
+
+db.getCollection('Test').find({B040002:"2361414721"}).sort({_id:-1})
+db.getCollection('Test').find({B040002:"2747032181"}).sort({_id:-1})
+
+db.getCollection('Test').find({B040002:{$in:["2361414721","2684373107"]}}).sort({_id:-1})
+
+
+db.getCollection('TMailInfo').find({"H010001":"1010008", "B040022":{$exists:true}})
+
+db.getCollection('Test').find({'esInfo':{$exists:true}}).count()
+db.getCollection('Test').find().count()

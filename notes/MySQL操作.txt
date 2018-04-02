@@ -1,0 +1,74 @@
+﻿————————————————————————————————————————————————————————————————————
+___________________________ mysql 使用说明 _________________________
+
+# rpm -qa|grep mysql				----查看当前系统是否安装了MySQL
+# rpm -nodeps mysql-libsxxx.xxx			----卸载MySQL(将/var/lib/mysql目录下所有文件删除)
+
+
+# tar vxf MySQLxxx.tar				----解压MySQL安装包
+# rpm -ivh MySQL-server-xxx.rpm			----安装Server
+# rpm -ivh MySQL-client-xxx.rpm			----安装Client
+
+# service mysqld start				----启动服务
+# service mysqld stop				----关闭服务
+# service mysqld status				----查看状态
+
+# chkconfig --add mysql				----把启动命令添加到Linux系统的启动服务组中
+# chkconfig mysql on				----（开机即启动 mysql服务）
+# chkconfig --list				----查看启动组列表服务（开机自启的服务）
+
+# /sbin/chkconfig --add mysql
+# /sbin/chkconfig mysql on
+# /sbin/chkconfig --list
+
+								
+# mysql_secure_installation    				----1.忘记用户密码，但知道初始密码（然后根据提示，即可设置用户登录密码）
+# mysqladmin -u root password 123456			----2.修改密码	
+				
+# mysql -u root -p					----3.登录用户（然后根据提示，输入用户(root)密码(123456)，即可进入数据库）
+# mysql -u APT -pAPT -DAPT
+
+mysql -h192.168.8.11 -uusername -ppwd  -Pport db_psw_manage
+eg: mysql -h192.168.8.11 -uroot -p123456  -P3306 db_psw_manage
+eg: mysql -h192.168.8.14 -uAPT -pAPT  -P3306 db_psw_manage
+
+
+-------------------- mysql 常用命令 ------------------
+mysql> show databases;				----1.查看所有数据库（当前用户下）
+mysql> use test;				----2.切换到某一数据库（eg:test数据库）
+mysql> show tables;				----3.查看当前库中所有表
+mysql> describe student;			----4.显示表(student)的结构
+mysql> desc student;				----简写（同 describe）
+	
+mysql> create database xxx(库名);		----5.创建新的库（eg:MyDB）
+mysql> use MyDB;
+mysql> create table xxx(字段设定列表);		----创建新表
+
+mysql> drop table xxx;				----6删除表
+mysql> drop databases xxx;			----删除数据库
+
+
+mysql> show create table TMail;    ----查看表结构（包括字段和索引）
+mysql> ALTER TABLE TMail ADD INDEX TMail_Index_Type (`Type`); 	----添加索引
+show program
+
+-------------------- 增 删 改 查 ------------------
+mysql> insert ...into table ...values...	----增
+mysql> delect ...from table ...where...		----删
+mysql> update ...table ...set...where...	----改
+mysql> select ...from table ...where...		----查
+
+
+mysql> select * from TMailContent order by Id desc limit 1;
+
+
+---------------------- mysql C接口 ---------------------
+
+
+------------------- mysql Python接口 -------------------
+
+
+
+select * from TMailContent order by Id desc;
+
+

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 '''
     @File        MysqlConnector.py
-    @Author      tx
+    @Author
     @CreatedDate 2018-04-02
 '''
 
@@ -16,7 +16,7 @@ sys.setdefaultencoding('utf8')
 conffile = '../conf/SysSet.xml'
 
 class MysqlConnector(object):
-    def __init__(self, conffile):
+    def __init__(self, conffile=conffile):
         self.conn = None
         self.cur = None
         dbInfo = readConfig(conffile)

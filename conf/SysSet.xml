@@ -6,6 +6,10 @@
         <db_name>Ttest</db_name>
         <db_user>xxx</db_user>
         <db_pwd>xxx</db_pwd>
+        <node>
+            <ip>192.168.xx.xx</ip>
+            <es>9200</es>
+        </node>
     </database>
     <webserver>127.0.0.1</webserver>
 </Config>

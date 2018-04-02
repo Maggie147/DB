@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Config>
+    <database>
+        <db_address>127.0.0.1</db_address>
+        <db_port>27017</db_port>
+        <db_name>Ttest</db_name>
+        <db_user>xxx</db_user>
+        <db_pwd>xxx</db_pwd>
+    </database>
+    <webserver>127.0.0.1</webserver>
+</Config>

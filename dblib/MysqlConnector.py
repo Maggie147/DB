@@ -5,12 +5,18 @@
     @Created On 2018-04-02
     @Updated On 2018-04-04
 '''
+import os
+import sys
+currentUrl = os.path.dirname(__file__)
+parentUrl = os.path.abspath(os.path.join(currentUrl, os.pardir))
+# print(parentUrl)
+sys.path.append(parentUrl)
 
 # from xml.etree import ElementTree
 import xml.etree.ElementTree as ET
 import MySQLdb
 import time
-import sys
+
 reload(sys)
 sys.setdefaultencoding('utf8')
 

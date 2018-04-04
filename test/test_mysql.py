@@ -22,7 +22,7 @@ sys.setdefaultencoding('utf8')
 
 
 def main():
-    xmlpath = './conf/SysSet.xml'
+    xmlpath = '../conf/SysSet.xml'
     testTable = "TestTable"
 
     start_time = time.time()

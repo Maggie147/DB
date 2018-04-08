@@ -13,7 +13,11 @@ sys.path.append(parentUrl)
 
 # from xml.etree import ElementTree
 import xml.etree.ElementTree as ET
-import MySQLdb
+try:
+    import MySQLdb as mysql
+except ImportError:
+    import pymysql as mysql
+
 import time
 reload(sys)
 sys.setdefaultencoding('utf8')
@@ -168,11 +172,11 @@ class MysqlConnector(object):
 
 
 def test():
-    mysql = MysqlConnector(conffile)            # conffile = '../conf/SysSet.xml'
+    db = MysqlConnector(conffile)            # conffile = '../conf/SysSet.xml'
     testTable = "TestTable"
 
     # create table
-    ret = mysql.create_test(testTable)
+    ret = db.create_test(testTable)
     if not ret:
         print("create table [%s] failed!!!" % testTable)
     print("create table [%s] succeed!!!" % testTable)
@@ -180,29 +184,29 @@ def test():
     # insert info
     for i in range(0, 10):
         insertInfo = {'Name':'aa_'+str(i), 'Num':i, 'Content': 'aabbccdd_'+str(i)*6, 'Time':int(time.time())}
-        mysql.insert_test(testTable, insertInfo)
+        db.insert_test(testTable, insertInfo)
     for i in range(10, 20):
         insertInfo = {'Name':'bb_'+str(i), 'Num':i, 'Content': 'aabbccdd_'+str(i)*6, 'Time':int(time.time())}
-        mysql.insert_test(testTable, insertInfo)
+        db.insert_test(testTable, insertInfo)
 
     # find_one
     queryInfo = {'filed':'Num', 'value': '5'}
-    result = mysql.find_one_test(testTable, queryInfo)
+    result = db.find_one_test(testTable, queryInfo)
     print("find_one_test : ", result)
 
     # find_many
     queryInfo = {'filed':'Name', 'value': 'aa'}
     # queryInfo = {'filed':'Num', 'value': '5'}
-    result2 = mysql.find_many_test(testTable, queryInfo, limit=10)
+    result2 = db.find_many_test(testTable, queryInfo, limit=10)
     for item in result2:
         print(item)
 
     print("\n")
-    result2 = mysql.find_test(testTable, startid=3)
+    result2 = db.find_test(testTable, startid=3)
     for item in result2:
         print(item)
 
-    lastNum = mysql.get_last_Id_test(testTable)
+    lastNum = db.get_last_Id_test(testTable)
     print("The last Id: %s"% str(lastNum))
 
 

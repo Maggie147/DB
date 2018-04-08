@@ -3,25 +3,23 @@
     @File        MysqlConnector.py
     @Author
     @Created On 2018-04-02
-    @Updated On 2018-04-04
+    @Updated On 2018-04-08
 '''
 import os
 import sys
 currentUrl = os.path.dirname(__file__)
 parentUrl = os.path.abspath(os.path.join(currentUrl, os.pardir))
-# print(parentUrl)
 sys.path.append(parentUrl)
 
 # from xml.etree import ElementTree
 import xml.etree.ElementTree as ET
 import MySQLdb
 import time
-
 reload(sys)
 sys.setdefaultencoding('utf8')
 
-conffile = '../conf/SysSet.xml'
 
+conffile = '../conf/SysSet.xml'
 class MysqlConnector(object):
     def __init__(self, conffile=conffile):
         self.conn = None
@@ -32,8 +30,7 @@ class MysqlConnector(object):
     def readConfig(self, xmlpath):
         DB = {}
         try:
-            tree = ET.ElementTree(file=xmlpath)
-            # tree = ET.parse(xmlpath)
+            tree = ET.ElementTree(file=xmlpath)             # tree = ET.parse(xmlpath)
             root = tree.getroot()
             database = root.find('database')
             DB['db_host']  = database.find('db_address').text
@@ -70,6 +67,7 @@ class MysqlConnector(object):
         except Exception as e:
             print('exit error!!!')
 
+
     def create_test(self, tablename='TestTable'):
         sql = '''CREATE TABLE IF NOT EXISTS `%s` (
   `Id` int(11) NOT NULL AUTO_INCREMENT,
@@ -96,7 +94,7 @@ class MysqlConnector(object):
             MySQLdb.escape_string(str(values['Name']).strip()), \
             values['Num'], \
             MySQLdb.escape_string(values['Content']).strip(), \
-            str(values['Time']))                                     # MySQLdb.FROM_UNIXTIME(values['Time'].strip()))
+            str(values['Time']))
 
         try:
             self.cursor.execute(sql)
@@ -108,7 +106,10 @@ class MysqlConnector(object):
 
 
     def find_one_test(self, tablename, query):
-        sql = "select * from %s where %s = %s;" % (tablename, query['filed'], query['value'])
+        sql = "select * from {tablename} where {filed} = {value};".format(
+            tablename = tablename,
+            filed = query['filed'],
+            value = query['value'])
         try:
             self.cursor.execute(sql)
             values = self.cursor.fetchone()
@@ -117,16 +118,15 @@ class MysqlConnector(object):
             print(e)
         return values
 
+
     def find_many_test(self, tablename, query=None, limit=10):
         values = []
         if query:
-            # sql = "select * from %s where %s = %s order by Id limit %d;" % (tablename, query['filed'], query['value'], limit)
             queryValue = '%'+query['value']+'%'
             sql = "select * from %s where %s like \'%s\' order by Id limit %d;" % (tablename, query['filed'], queryValue, limit)
         else:
             sql = "select * from %s order by Id limit %d;" % (tablename, limit)
 
-        print("sql: %s" % sql)
         try:
             self.cursor.execute(sql)
             values = self.cursor.fetchall()
@@ -139,7 +139,9 @@ class MysqlConnector(object):
 
     def find_test(self, tablename, startid, limit=10):
         values = []
-        sql = "select Id, Name, Num, UNIX_TIMESTAMP(Time) from Testuser where Id > 3 order by Id limit 10;"   # (INET_NTOA)
+        sql = "select Id, Name, Num, UNIX_TIMESTAMP(Time) from {tablename} where Id > {startid} order by Id limit 10;".format(
+            tablename = tablename,
+            startid = startid)                                                                        # (INET_NTOA)
         try:
             count = self.cursor.execute(sql)
             values = self.cursor.fetchall()
@@ -151,9 +153,9 @@ class MysqlConnector(object):
         return values
 
 
-    def get_last_Num_test(self, tablename):
+    def get_last_Id_test(self, tablename):
         num = 0
-        sql = "select Num from %s order by Id desc limit 1"%tablename
+        sql = "select Num from {} order by Id desc limit 1".format(tablename)
         try:
             self.cursor.execute(sql)
             result = self.cursor.fetchall()
@@ -167,38 +169,40 @@ class MysqlConnector(object):
 
 def test():
     mysql = MysqlConnector(conffile)            # conffile = '../conf/SysSet.xml'
-    testTable = "Testuser"
+    testTable = "TestTable"
 
-    # # create table
-    # ret = mysql.create_test(testTable)
-    # if not ret:
-    #     print("create table [%s] failed!!!" % testTable)
-    # print("create table [%s] succeed!!!" % testTable)
+    # create table
+    ret = mysql.create_test(testTable)
+    if not ret:
+        print("create table [%s] failed!!!" % testTable)
+    print("create table [%s] succeed!!!" % testTable)
 
     # insert info
-    # for i in range(0, 10):
-    #     insertInfo = {'Name':'bb_'+str(i), 'Num':i, 'Content': 'aabbccdd_'+str(i)*6, 'Time':int(time.time())}
-    #     mysql.insert_test(testTable, insertInfo)
+    for i in range(0, 10):
+        insertInfo = {'Name':'aa_'+str(i), 'Num':i, 'Content': 'aabbccdd_'+str(i)*6, 'Time':int(time.time())}
+        mysql.insert_test(testTable, insertInfo)
 
     # find_one
     queryInfo = {'filed':'Num', 'value': '5'}
     result = mysql.find_one_test(testTable, queryInfo)
-    print(result)
+    print("find_one_test : ", result)
 
     # find_many
-    # queryInfo = {'filed':'Name', 'value': 'bb'}
-    queryInfo = {'filed':'Num', 'value': '5'}
+    queryInfo = {'filed':'Name', 'value': 'aa'}
+    # queryInfo = {'filed':'Num', 'value': '5'}
     result2 = mysql.find_many_test(testTable, queryInfo, limit=10)
     for item in result2:
         print(item)
 
     print("\n")
-    result2 = mysql.find_test(testTable, 3)
+    result2 = mysql.find_test(testTable, startid=3)
     for item in result2:
         print(item)
 
-    lastNum = mysql.get_last_Num_test(testTable)
-    print("The last Num: %s"% str(lastNum))
+    lastNum = mysql.get_last_Id_test(testTable)
+    print("The last Id: %s"% str(lastNum))
+
+
 
 if __name__ == '__main__':
     test()

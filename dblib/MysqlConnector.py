@@ -181,6 +181,9 @@ def test():
     for i in range(0, 10):
         insertInfo = {'Name':'aa_'+str(i), 'Num':i, 'Content': 'aabbccdd_'+str(i)*6, 'Time':int(time.time())}
         mysql.insert_test(testTable, insertInfo)
+    for i in range(10, 20):
+        insertInfo = {'Name':'bb_'+str(i), 'Num':i, 'Content': 'aabbccdd_'+str(i)*6, 'Time':int(time.time())}
+        mysql.insert_test(testTable, insertInfo)
 
     # find_one
     queryInfo = {'filed':'Num', 'value': '5'}

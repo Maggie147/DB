@@ -10,6 +10,7 @@ import xml.etree.ElementTree as ET
 import pymongo, traceback
 import time
 import os
+import sys
 reload(sys)
 sys.setdefaultencoding('utf8')
 
@@ -19,8 +20,8 @@ class MongoConnector(object):
     def __init__(self, conffile=conffile):
         self.__client = None
         self.__db = None
-        dbInfo = readConfig(conffile)
-        connectMongoDB(dbInfo)
+        dbInfo = self.readConfig(conffile)
+        self.connectMongoDB(dbInfo)
 
     def readConfig(self, xmlpath):
         DB = {}
@@ -46,7 +47,7 @@ class MongoConnector(object):
             self.__client = pymongo.MongoClient(host = uri, maxPoolSize = 1, socketKeepAlive = True)
             self.__db = self.__client[DB['db_name']]
         except Exception, e:
-            print traceback.print_exc()
+            print(traceback.print_exc())
             sys.exit(1)
 
     def __del__(self):
@@ -54,13 +55,24 @@ class MongoConnector(object):
             self.__client.close()
             self.__client = None
 
+    def find_one(self, collection_name,  info):
+        cursor = {}
+        try:
+            collection = self.__db[collection_name]
+            cursor = collection.find_one(info)
+        except pymongo.errors.PyMongoError, e:
+            print(e)
+        finally:
+            #print '>>>>>>',type(cursor)
+            return cursor
+
     def find(self, collection_name, query = None, field = None, sort = None, limit = 0):
         cursor = {}
         try:
             collection = self.__db[collection_name]
             cursor = collection.find(query, field, sort = sort, limit = limit)
         except Exception, e:
-            print traceback.print_exc()
+            print(traceback.print_exc())
         finally:
             return cursor
 
@@ -69,14 +81,24 @@ class MongoConnector(object):
             collection = self.__db[collection_name]
             collection.insert_one(doc)
         except Exception, e:
-            print traceback.print_exc()
+            print(traceback.print_exc())
+
+    def insert_many(self, collection_name, docs):
+        results = None
+        try:
+            collection = self.__db[collection_name]
+            results = collection.insert_many(docs, False)
+        except Exception, e:
+            print(traceback.print_exc())
+        finally:
+            return results
 
     def update(self, collection_name, query, field, upsert = False):
         try:
             collection = self.__db[collection_name]
             collection.update_one(query, field, upsert)
         except Exception, e:
-            print traceback.print_exc()
+            print(traceback.print_exc())
 
     def count(self, collection_name, query):
         c = 0
@@ -84,7 +106,7 @@ class MongoConnector(object):
             collection = self.__db[collection_name]
             c = collection.count(query)
         except Exception, e:
-            print traceback.print_exc()
+            print(traceback.print_exc())
         finally:
             return c
 
@@ -94,7 +116,7 @@ class MongoConnector(object):
             collection = self.__db[collection_name]
             cursor = collection.aggregate(pipeline)
         except Exception, e:
-            print traceback.print_exc()
+            print(traceback.print_exc())
         finally:
             return cursor
 
@@ -103,21 +125,18 @@ class MongoConnector(object):
             collection = self.__db[collection_name]
             collection.delete_many(query)
         except Exception, e:
-            print traceback.print_exc()
+            print(traceback.print_exc())
 
     def save(self, collection_name, doc):
         try:
             collection = self.__db[collection_name]
             collection.save(doc)
         except Exception, e:
-            print traceback.print_exc()
+            print(traceback.print_exc())
 
-    def insert_many(self, collection_name, docs):
-        results = None
+    def drop(self, collection_name):
         try:
             collection = self.__db[collection_name]
-            results = collection.insert_many(docs, False)
-        except Exception, e:
-            print traceback.print_exc()
-        finally:
-            return results
+            collection.drop()
+        except pymongo.errors.PyMongoError,e:
+            print(e)

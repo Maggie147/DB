@@ -18,7 +18,8 @@ from dblib.MongoConnector import MongoConnector
 
 reload(sys)
 sys.setdefaultencoding('utf8')
-g_iDEBUG = 1
+
+g_iDEBUG = 0
 def DEBUG(*value):
     if g_iDEBUG == 1:
         t = time.strftime("%Y-%m-%d %H:%M:%S")
@@ -28,10 +29,10 @@ def DEBUG(*value):
             print i,
         print ""
 
-
 class MongoTest(object):
     def __init__(self, xmlpath, tablename, debug=1):
-        self.debug = debug
+        global g_iDEBUG
+        g_iDEBUG = debug
         self.conn = MongoConnector(xmlpath)
         self.collection = tablename
 

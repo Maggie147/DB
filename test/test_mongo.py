@@ -1,4 +1,4 @@
-# -*- codinutf-8 -*-
+# -*- encoding: utf-8-*-
 '''
     @File    test  dblib.MongoConnector
     @Author

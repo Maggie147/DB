@@ -1,138 +1,148 @@
-# -*- coding: utf-8 -*-
+# -*- codinutf-8 -*-
 '''
-    @File        test  dblib MongoConnector
+    @File    test  dblib.MongoConnector
     @Author
     @Created On 2018-04-11
-    @Updated On 2018-04-11
+    @Updated On 2018-04-12
 '''
+# py3 = True if sys.version > '3' else False
+
 import os
 import sys
 import time
 from bson.objectid import ObjectId
-pwd = os.path.dirname(os.path.realpath(__file__))
-pwd2 = sys.path[0]
+pwd = os.path.dirname(os.path.realpath(__file__))       #pwd2 = sys.path[0]
 pardir = os.path.abspath(os.path.join(pwd, os.pardir))
 sys.path.append(pardir)
 from dblib.MongoConnector import MongoConnector
 
 reload(sys)
 sys.setdefaultencoding('utf8')
+g_iDEBUG = 1
+def DEBUG(*value):
+    if g_iDEBUG == 1:
+        t = time.strftime("%Y-%m-%d %H:%M:%S")
+        filename = sys.argv[0][sys.argv[0].rfind(os.sep)+1:]
+        print "[python2.7][%s, %s]:" % (filename, t),
+        for i in value:
+            print i,
+        print ""
 
 
 class MongoTest(object):
-    def __init__():
+    def __init__(self, xmlpath, tablename, debug=1):
+        self.debug = debug
+        self.conn = MongoConnector(xmlpath)
+        self.collection = tablename
 
+        try:
+            self.conn.drop(tablename)
+        except Exception as e:
+            pass
 
-def insertOne_test(conn, collection):
-    try:
-        for i in range(1, 10):
-            value = {
-                    # "_id" : ObjectId("5a571f6551d80beafd2fa33d"),
-                    "name": 'aa_'+str(i),
-                    "num": i,
-                    "update":int(time.time())}
-            conn.insert(collection, value)
+    def insertOne_test(self):
+        try:
+            for i in range(1, 10):
+                value = {
+                        # "_id" : ObjectId("5a571f6551d80beafd2fa33d"),
+                        "name": 'aa_'+str(i),
+                        "num": i,
+                        "updateTime":int(time.time())}
+                self.conn.insert(self.collection, value)
 
-        print("insertOne_test end!")
-        return True
-    except Exception as e:
-        print(e)
-        return False
+            DEBUG("insertOne_test end!")
+        except Exception as e:
+            DEBUG(e)
+            DEBUG("insertOne_test failed!!!")
 
-def insertMany_test(conn, collection):
-    try:
-        values = []
-        for i in range(10, 20):
-            value = {
-                    # "_id" : ObjectId("5a571f6551d80beafd2fa33d"),
-                    "name": 'bb_'+str(i),
-                    "num": i,
-                    "updateTime":int(time.time())}
-            values.append(value)
-        conn.insert_many(collection, values)
+    def insertMany_test(self):
+        try:
+            values = []
+            for i in range(10, 20):
+                value = {
+                        # "_id" : ObjectId("5a571f6551d80beafd2fa33d"),
+                        "name": 'bb_'+str(i),
+                        "num": i,
+                        "updateTime":int(time.time())}
+                values.append(value)
+            self.conn.insert_many(self.collection, values)
 
-        print("insertMany_test end!")
-        return True
-    except Exception as e:
-        print(e)
-        return False
+            DEBUG("insertMany_test end!")
+        except Exception as e:
+            DEBUG(e)
+            DEBUG("insertMany_test failed!!!")
 
+    def find_test(self):
+        try:
+            DEBUG("find_test...")
+            results = self.conn.find(self.collection, limit=9)
+            for item in results:
+                DEBUG("\t\tname: {}\t num: {}\t updateTime: {}".format(item.get('name'), item.get('num'), item.get('updateTime')) )
+            DEBUG("find_test end!")
+        except Exception as e:
+            DEBUG(e)
+            DEBUG("find_test failed!!!")
 
-def find_test(conn, collection):
-    try:
-        results = conn.find(collection)
-        for item in results:
-            print("num:", item.get('num'))
+    def update_test(self):
+        try:
+            DEBUG("update_test...")
+            query = {'num':5}
+            value = {'$set':{'name':"aa_update",'updateTime':int(time.time())}}
+            self.conn.update(self.collection, query, value)
 
-        print("find_test end!")
-        return True
-    except Exception as e:
-        print(e)
-        return False
+            value = self._findOne_test(query)
+            if not value:
+                DEBUG("Not find update info!!")
+            else:
+                DEBUG("\t\tUpdated Info:")
+                DEBUG("\t\tname: {}\t num:{}\t updateTime:{}".format(value.get('name'), value.get('num'), value.get('updateTime')) )
 
-def _findOne_test(conn, collection):
-    try:
-        query = {'num':5}
-        result = conn.find_one(collection, query)
-        return result
-    except Exception as e:
-        print(e)
-        return None
+            DEBUG("update_test end!")
+        except Exception as e:
+            DEBUG(e)
+            DEBUG("update_test failed!!!")
 
+    def count_test(self):
+        try:
+            DEBUG("count_test...")
+            query = {'name': "aa_1"}
+            mycount = self.conn.count(self.collection, query)
+            DEBUG("\t\t'{0}'' info count: {1}".format(self.collection, mycount))
 
+            DEBUG("count_test end!")
+        except Exception as e:
+            DEBUG(e)
+            DEBUG("count_test failed!!!")
 
-def update_test(conn, collection):
-    try:
-        # update num=5
-        query = {'num':5}
-        value = {'$set':{'name':"aa_update",'updateTime':int(time.time())}}
-        conn.update(collection, query, value)
-
-        updated = _findOne_test(conn, collection)
-        if not updated:
-            print("find find update item info!!")
-
-        print("Update Info: ")
-        print("name      : ", updated.get('name'))
-        print("updateTime: ", updated.get('updateTime'))
-        return True
-    except Exception as e:
-        print(e)
-        return False
-
+    def _findOne_test(self, query):
+        try:
+            result = self.conn.find_one(self.collection, query)
+            return result
+        except Exception as e:
+            DEBUG(e)
+            return None
 
 
 def main():
+    start_time = time.time()
+
     xmlpath = '../conf/SysSet.xml'
     myTable = "TestTable"
 
-    start_time = time.time()
-    myConn = MongoConnector(xmlpath)
+    testObj = MongoTest(xmlpath, myTable)
 
-    myConn.drop(myTable)
+    testObj.insertOne_test()
 
-    ret = insertOne_test(myConn, myTable)
-    if not ret:
-        print("insertOne_test error!!!")
-    ret = insertMany_test(myConn, myTable)
-    if not ret:
-        print("insertOne_test error!!!")
+    testObj.insertMany_test()
+
+    testObj.find_test()
+
+    testObj.update_test()
+
+    testObj.count_test()
 
     end_time = time.time()
-    print("Insert  time: %d" % (end_time-start_time))
-
-
-    ret = find_test(myConn, myTable)
-    if not ret:
-        print("find_test error!!!")
-
-    ret = update_test(myConn, myTable)
-    if not ret:
-        print("update_test error!!!")
-
-    mycount = myConn.count(myTable, {'name': "aa_1"})
-    print("count: ", mycount)
-
+    DEBUG("Test last time: ", (end_time-start_time))
 
 
 if __name__ == "__main__":

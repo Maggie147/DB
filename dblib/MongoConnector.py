@@ -3,6 +3,7 @@
     @File        MongoConnector.py
     @Author
     @CreatedDate 2018-04-02
+    @UpdatedDate 2018-04-12
 '''
 
 # from xml.etree import ElementTree
@@ -140,3 +141,7 @@ class MongoConnector(object):
             collection.drop()
         except pymongo.errors.PyMongoError,e:
             print(e)
+
+
+if __name__ == '__main__':
+    handle = MongoConnector()
